@@ -1,8 +1,10 @@
 package guru.springframework.spring6restmvc.controller;
 
 import guru.springframework.spring6restmvc.entities.Beer;
+import guru.springframework.spring6restmvc.entities.Customer;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
+import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@Transactional
 class BeerControllerIT {
     @Autowired
     BeerController beerController;
@@ -29,6 +32,30 @@ class BeerControllerIT {
     @Autowired
     BeerMapper beerMapper;
 
+    @Test
+    void testUpdateBeerPatchById_notFound() {
+        // given
+        BeerDTO dto = BeerDTO.builder().build();
+
+        // when, then
+        assertThrows(NotFoundException.class, () -> beerController.updateBeerPatchById(UUID.randomUUID(), dto));
+    }
+
+    @Test
+    void testUpdateBeerPatchById_success() {
+        // given
+        BeerDTO dto = BeerDTO.builder()
+                .beerName("Sol")
+                .build();
+        Beer beer = beerRepository.findAll().get(0);
+
+        // when
+        ResponseEntity<?> responseEntity = beerController.updateBeerPatchById(beer.getId(), dto);
+
+        // then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        assertThat(beer.getBeerName()).isEqualTo("Sol");
+    }
 
     @Test
     void testDeleteByIDNotFound() {
@@ -37,16 +64,14 @@ class BeerControllerIT {
         });
     }
 
-    @Rollback
-    @Transactional
     @Test
     void deleteByIdFound() {
         Beer beer = beerRepository.findAll().get(0);
 
-        ResponseEntity responseEntity = beerController.deleteById(beer.getId());
+        ResponseEntity<?> responseEntity = beerController.deleteById(beer.getId());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
 
-        assertThat(beerRepository.findById(beer.getId()).isEmpty());
+        assertThat(beerRepository.findById(beer.getId()).isEmpty()).isTrue();
     }
 
     @Test
@@ -56,8 +81,6 @@ class BeerControllerIT {
         });
     }
 
-    @Rollback
-    @Transactional
     @Test
     void updateExistingBeer() {
         Beer beer = beerRepository.findAll().get(0);
@@ -67,22 +90,20 @@ class BeerControllerIT {
         final String beerName = "UPDATED";
         beerDTO.setBeerName(beerName);
 
-        ResponseEntity responseEntity = beerController.updateById(beer.getId(), beerDTO);
+        ResponseEntity<?> responseEntity = beerController.updateById(beer.getId(), beerDTO);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
 
-        Beer updatedBeer = beerRepository.findById(beer.getId()).get();
+        Beer updatedBeer = beerRepository.findById(beer.getId()).orElseThrow();
         assertThat(updatedBeer.getBeerName()).isEqualTo(beerName);
     }
 
-    @Rollback
-    @Transactional
     @Test
     void saveNewBeerTest() {
         BeerDTO beerDTO = BeerDTO.builder()
                 .beerName("New Beer")
                 .build();
 
-        ResponseEntity responseEntity = beerController.handlePost(beerDTO);
+        ResponseEntity<?> responseEntity = beerController.handlePost(beerDTO);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(201));
         assertThat(responseEntity.getHeaders().getLocation()).isNotNull();
@@ -90,7 +111,7 @@ class BeerControllerIT {
         String[] locationUUID = responseEntity.getHeaders().getLocation().getPath().split("/");
         UUID savedUUID = UUID.fromString(locationUUID[4]);
 
-        Beer beer = beerRepository.findById(savedUUID).get();
+        Beer beer = beerRepository.findById(savedUUID).orElseThrow();
         assertThat(beer).isNotNull();
     }
 
@@ -117,8 +138,6 @@ class BeerControllerIT {
         assertThat(dtos.size()).isEqualTo(3);
     }
 
-    @Rollback
-    @Transactional
     @Test
     void testEmptyList() {
         beerRepository.deleteAll();
