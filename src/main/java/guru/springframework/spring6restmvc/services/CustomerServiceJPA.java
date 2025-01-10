@@ -1,5 +1,6 @@
 package guru.springframework.spring6restmvc.services;
 
+import guru.springframework.spring6restmvc.entities.Customer;
 import guru.springframework.spring6restmvc.mappers.CustomerMapper;
 import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
@@ -23,12 +24,20 @@ public class CustomerServiceJPA implements CustomerService {
 
     @Override
     public Optional<CustomerDTO> getCustomerById(UUID uuid) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                customerMapper.customerToCustomerDto(
+                        customerRepository
+                                .findById(uuid)
+                                .orElse(null)
+                )
+        );
     }
 
     @Override
     public List<CustomerDTO> getAllCustomers() {
-        return null;
+        return customerRepository.findAll().stream()
+                .map(customerMapper::customerToCustomerDto)
+                .toList();
     }
 
     @Override
