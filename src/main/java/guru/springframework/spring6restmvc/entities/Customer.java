@@ -35,6 +35,9 @@ public class Customer {
     private UUID id;
     private String name;
 
+    @Column
+    private String email;
+
     @Version
     private Integer version;
     private LocalDateTime createdDate;
