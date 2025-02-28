@@ -14,4 +14,5 @@ public class CustomerDTO {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
     private String name;
+    private String email;
 }
