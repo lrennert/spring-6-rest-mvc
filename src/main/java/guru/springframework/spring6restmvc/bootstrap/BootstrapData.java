@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -65,7 +64,6 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private void loadCustomerData() {
-
         if (customerRepository.count() == 0) {
             Customer customer1 = Customer.builder()
                     .createdDate(LocalDateTime.now())
@@ -76,14 +74,12 @@ public class BootstrapData implements CommandLineRunner {
             Customer customer2 = Customer.builder()
                     .createdDate(LocalDateTime.now())
                     .lastModifiedDate(LocalDateTime.now())
-                    .id(UUID.randomUUID())
                     .name("Customer 2")
                     .build();
 
             Customer customer3 = Customer.builder()
                     .createdDate(LocalDateTime.now())
                     .lastModifiedDate(LocalDateTime.now())
-                    .id(UUID.randomUUID())
                     .name("Customer 3")
                     .build();
 
