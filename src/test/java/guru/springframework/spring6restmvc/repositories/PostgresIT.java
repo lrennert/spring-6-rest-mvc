@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("localpostgres")
-public class PostgresTest {
+public class PostgresIT {
 
 	@Container
 	@ServiceConnection
