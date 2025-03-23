@@ -12,4 +12,6 @@ public interface BeerRepository extends JpaRepository<Beer, UUID> {
     List<Beer> findByBeerNameIsLikeIgnoreCase(String beerName);
 
     List<Beer> findByBeerStyle(BeerStyle beerStyle);
+
+    List<Beer> findByBeerNameIsLikeIgnoreCaseAndBeerStyle(String beerName, BeerStyle beerStyle);
 }
