@@ -69,7 +69,7 @@ public class BeerServiceMock implements BeerService {
     public Optional<BeerDTO> patchBeerById(UUID beerId, BeerDTO beer) {
         BeerDTO existing = beerMap.get(beerId);
 
-        if (StringUtils.hasText(beer.getBeerName())){
+        if (StringUtils.hasText(beer.getBeerName())) {
             existing.setBeerName(beer.getBeerName());
         }
 
@@ -81,7 +81,7 @@ public class BeerServiceMock implements BeerService {
             existing.setPrice(beer.getPrice());
         }
 
-        if (beer.getQuantityOnHand() != null){
+        if (beer.getQuantityOnHand() != null) {
             existing.setQuantityOnHand(beer.getQuantityOnHand());
         }
 
@@ -110,7 +110,7 @@ public class BeerServiceMock implements BeerService {
     }
 
     @Override
-    public List<BeerDTO> listBeers(String beerName, BeerStyle beerStyle){
+    public List<BeerDTO> listBeers(String beerName, BeerStyle beerStyle, Boolean showInventory) {
         return new ArrayList<>(beerMap.values());
     }
 
