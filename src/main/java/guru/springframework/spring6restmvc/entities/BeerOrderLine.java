@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +18,6 @@ import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -28,7 +26,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BeerOrder {
+public class BeerOrderLine {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -51,11 +49,12 @@ public class BeerOrder {
         return this.id == null;
     }
 
-    private String customerRef;
+    @ManyToOne
+    private BeerOrder beerOrder;
 
     @ManyToOne
-    private Customer customer;
+    private Beer beer;
 
-    @OneToMany(mappedBy = "beerOrder")
-    private Set<BeerOrderLine> beerOrderLines;
+    private Integer orderQuantity = 0;
+    private Integer quantityAllocated = 0;
 }
