@@ -28,7 +28,7 @@ import java.util.UUID;
 @Builder
 public class BeerOrder {
 
-    public BeerOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, Customer customer, Set<BeerOrderLine> beerOrderLines) {
+    public BeerOrder(UUID id, Long version, LocalDateTime createdDate, LocalDateTime lastModifiedDate, String customerRef, Customer customer, Set<BeerOrderLine> beerOrderLines) {
         this.id = id;
         this.version = version;
         this.createdDate = createdDate;
