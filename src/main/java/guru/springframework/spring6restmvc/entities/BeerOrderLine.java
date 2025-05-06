@@ -55,6 +55,9 @@ public class BeerOrderLine {
     @ManyToOne
     private Beer beer;
 
+    @Builder.Default
     private Integer orderQuantity = 0;
+
+    @Builder.Default
     private Integer quantityAllocated = 0;
 }
