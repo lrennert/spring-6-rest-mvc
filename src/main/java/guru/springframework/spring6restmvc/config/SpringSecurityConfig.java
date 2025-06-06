@@ -2,6 +2,7 @@ package guru.springframework.spring6restmvc.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -9,12 +10,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SpringSecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        httpSecurity.csrf(httpSecurityCsrfConfigurer ->
-                httpSecurityCsrfConfigurer.ignoringRequestMatchers("/api/**")
-        );
+        http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
-        return httpSecurity.build();
+        return http.build();
     }
 }
