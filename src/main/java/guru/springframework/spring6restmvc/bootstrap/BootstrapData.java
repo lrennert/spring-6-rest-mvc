@@ -10,12 +10,13 @@ import guru.springframework.spring6restmvc.services.BeerCsvService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -30,23 +31,27 @@ public class BootstrapData implements CommandLineRunner {
 
     @Transactional
     @Override
-    public void run(String... args) throws FileNotFoundException {
+    public void run(String... args) throws IOException {
         loadBeerData();
         loadCsvData();
         loadCustomerData();
     }
 
-    private void loadCsvData() throws FileNotFoundException {
-        if (beerRepository.count() < 10){
-            File file = ResourceUtils.getFile("classpath:csvdata/beers.csv");
+    private void loadCsvData() throws IOException {
+        if (beerRepository.count() >= 10) {
+            return;
+        }
 
-            List<BeerCSVRecord> recs = beerCsvService.convertCsv(file);
+        Resource resource = new ClassPathResource("csvdata/beers.csv");
+
+        try (InputStream inputStream = resource.getInputStream()) {
+            List<BeerCSVRecord> recs = beerCsvService.convertCsv(inputStream);
 
             recs.forEach(beerCSVRecord -> {
                 BeerStyle beerStyle = switch (beerCSVRecord.getStyle()) {
                     case "American Pale Lager" -> BeerStyle.LAGER;
-                    case "American Pale Ale (APA)", "American Black Ale", "Belgian Dark Ale", "American Blonde Ale" ->
-                            BeerStyle.ALE;
+                    case "American Pale Ale (APA)", "American Black Ale", "Belgian Dark Ale",
+                         "American Blonde Ale" -> BeerStyle.ALE;
                     case "American IPA", "American Double / Imperial IPA", "Belgian IPA" -> BeerStyle.IPA;
                     case "American Porter" -> BeerStyle.PORTER;
                     case "Oatmeal Stout", "American Stout" -> BeerStyle.STOUT;
