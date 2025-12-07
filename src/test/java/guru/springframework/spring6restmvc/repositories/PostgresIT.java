@@ -23,7 +23,7 @@ public class PostgresIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17");
+    PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17");
 
     @Autowired
     BeerRepository beerRepository;
