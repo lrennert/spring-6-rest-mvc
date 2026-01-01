@@ -147,6 +147,7 @@
                     </excludes>
                 </configuration>
                 <executions>
+                    <!-- needed for OpenAPI spec generation
                     <execution>
                         <id>springdoc</id>
                         <goals>
@@ -154,6 +155,7 @@
                             <goal>stop</goal>
                         </goals>
                     </execution>
+                    -->
                     <execution>
                         <id>build-info</id>
                         <goals>
@@ -162,6 +164,8 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- OpenAPI spec generation - re-enable together with the spring-boot-maven-plugin
+                 springdoc start/stop execution above when you want to regenerate oa3.yml.
             <plugin>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-maven-plugin</artifactId>
@@ -179,6 +183,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
