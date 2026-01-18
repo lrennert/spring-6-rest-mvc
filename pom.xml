@@ -23,6 +23,7 @@
         <springdoc-openapi-maven-plugin.version>1.5</springdoc-openapi-maven-plugin.version>
         <swagger-request-validator.version>2.46.0</swagger-request-validator.version>
         <logbook.version>3.12.3</logbook.version>
+        <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <spring-boot.run.profiles>postgres</spring-boot.run.profiles>
         <jwt-uri>http://localhost:9090</jwt-uri>
     </properties>
@@ -59,6 +60,16 @@
             <groupId>org.zalando</groupId>
             <artifactId>logbook-spring-boot-starter</artifactId>
             <version>${logbook.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zalando</groupId>
+            <artifactId>logbook-logstash</artifactId>
+            <version>${logbook.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
