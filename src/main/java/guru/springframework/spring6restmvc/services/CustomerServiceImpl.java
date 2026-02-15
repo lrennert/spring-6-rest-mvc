@@ -4,6 +4,8 @@ import guru.springframework.spring6restmvc.mappers.CustomerMapper;
 import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -14,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Primary
@@ -21,14 +24,18 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
 
+    @Cacheable(cacheNames = "customerCache")
     @Override
     public Optional<CustomerDTO> getCustomerById(UUID uuid) {
+        log.info("Get Customer by Id - in service");
         return Optional.ofNullable(customerMapper
                 .customerToCustomerDto(customerRepository.findById(uuid).orElse(null)));
     }
 
+    @Cacheable(cacheNames = "customerListCache")
     @Override
     public List<CustomerDTO> getAllCustomers() {
+        log.info("Get All Customers - in service");
         return customerRepository.findAll().stream()
                 .map(customerMapper::customerToCustomerDto)
                 .collect(Collectors.toList());
