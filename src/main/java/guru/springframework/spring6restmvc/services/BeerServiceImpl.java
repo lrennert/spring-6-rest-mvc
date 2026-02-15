@@ -33,11 +33,12 @@ public class BeerServiceImpl implements BeerService {
     private final BeerRepository beerRepository;
     private final BeerMapper beerMapper;
 
+    @Cacheable(cacheNames = "beerListCache")
     @Override
     public Page<BeerDTO> listBeers(String beerName, BeerStyle beerStyle, Boolean showInventory, Integer pageNumber, Integer pageSize) {
+        log.info("List Beers - in service");
 
         PageRequest pageRequest = buildPageRequest(pageNumber, pageSize);
-
         Page<Beer> beerPage;
 
         if (StringUtils.hasText(beerName) && beerStyle == null) {
