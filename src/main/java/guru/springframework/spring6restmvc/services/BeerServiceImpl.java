@@ -7,9 +7,8 @@ import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +33,7 @@ public class BeerServiceImpl implements BeerService {
 
     private final BeerRepository beerRepository;
     private final BeerMapper beerMapper;
+    private final CacheManager cacheManager;
 
     @Cacheable(cacheNames = "beerListCache")
     @Override
@@ -99,6 +99,8 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public BeerDTO saveNewBeer(BeerDTO beer) {
+        cacheManager.getCache("beerListCache").clear();
+
         return beerMapper.beerToBeerDto(beerRepository.save(beerMapper.beerDtoToBeer(beer)));
     }
 
@@ -108,6 +110,8 @@ public class BeerServiceImpl implements BeerService {
         // return Optional.of(beerMapper.beerToBeerDto(
         //         beerRepository.save(beerMapper.beerDtoToBeer(beer))
         // ));
+
+        clearCache(beerId);
 
         AtomicReference<Optional<BeerDTO>> atomicReference = new AtomicReference<>();
 
@@ -124,12 +128,10 @@ public class BeerServiceImpl implements BeerService {
         return atomicReference.get();
     }
 
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "beerCache", key = "#beerId"),
-            @CacheEvict(cacheNames = "beerListCache", allEntries = true)
-    })
     @Override
     public Boolean deleteById(UUID beerId) {
+        clearCache(beerId);
+
         if (beerRepository.existsById(beerId)) {
             beerRepository.deleteById(beerId);
             return true;
@@ -139,6 +141,8 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public Optional<BeerDTO> patchBeerById(UUID beerId, BeerDTO beer) {
+        clearCache(beerId);
+
         AtomicReference<Optional<BeerDTO>> atomicReference = new AtomicReference<>();
 
         beerRepository.findById(beerId).ifPresentOrElse(foundBeer -> {
@@ -164,5 +168,10 @@ public class BeerServiceImpl implements BeerService {
         });
 
         return atomicReference.get();
+    }
+
+    private void clearCache(UUID beerId) {
+        cacheManager.getCache("beerCache").evict(beerId);
+        cacheManager.getCache("beerListCache").clear();
     }
 }
