@@ -7,6 +7,7 @@ import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
@@ -99,7 +100,7 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public BeerDTO saveNewBeer(BeerDTO beer) {
-        cacheManager.getCache("beerListCache").clear();
+        Optional.ofNullable(cacheManager.getCache("beerListCache")).ifPresent(Cache::clear);
 
         return beerMapper.beerToBeerDto(beerRepository.save(beerMapper.beerDtoToBeer(beer)));
     }
@@ -171,7 +172,7 @@ public class BeerServiceImpl implements BeerService {
     }
 
     private void clearCache(UUID beerId) {
-        cacheManager.getCache("beerCache").evict(beerId);
-        cacheManager.getCache("beerListCache").clear();
+        Optional.ofNullable(cacheManager.getCache("beerCache")).ifPresent(beerCache -> beerCache.evict(beerId));
+        Optional.ofNullable(cacheManager.getCache("beerListCache")).ifPresent(Cache::clear);
     }
 }
