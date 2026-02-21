@@ -5,6 +5,8 @@ import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,15 @@ import java.util.stream.Collectors;
 @Service
 @Primary
 public class CustomerServiceImpl implements CustomerService {
+
+    private static final String CUSTOMER_CACHE = "customerCache";
+    private static final String CUSTOMER_LIST_CACHE = "customerListCache";
+
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
+    private final CacheManager cacheManager;
 
-    @Cacheable(cacheNames = "customerCache")
+    @Cacheable(cacheNames = CUSTOMER_CACHE)
     @Override
     public Optional<CustomerDTO> getCustomerById(UUID uuid) {
         log.info("Get Customer by Id - in service");
@@ -32,7 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .customerToCustomerDto(customerRepository.findById(uuid).orElse(null)));
     }
 
-    @Cacheable(cacheNames = "customerListCache")
+    @Cacheable(cacheNames = CUSTOMER_LIST_CACHE)
     @Override
     public List<CustomerDTO> getAllCustomers() {
         log.info("Get All Customers - in service");
@@ -43,28 +50,32 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO saveNewCustomer(CustomerDTO customer) {
+        Optional.ofNullable(cacheManager.getCache(CUSTOMER_LIST_CACHE)).ifPresent(Cache::clear);
+
         return customerMapper.customerToCustomerDto(customerRepository
                 .save(customerMapper.customerDtoToCustomer(customer)));
     }
 
     @Override
     public Optional<CustomerDTO> updateCustomerById(UUID customerId, CustomerDTO customer) {
+        clearCache(customerId);
+
         AtomicReference<Optional<CustomerDTO>> atomicReference = new AtomicReference<>();
 
         customerRepository.findById(customerId).ifPresentOrElse(foundCustomer -> {
             foundCustomer.setName(customer.getName());
             atomicReference.set(Optional.of(customerMapper
                     .customerToCustomerDto(customerRepository.save(foundCustomer))));
-        }, () -> {
-            atomicReference.set(Optional.empty());
-        });
+        }, () -> atomicReference.set(Optional.empty()));
 
         return atomicReference.get();
     }
 
     @Override
     public Boolean deleteCustomerById(UUID customerId) {
-        if(customerRepository.existsById(customerId)){
+        clearCache(customerId);
+
+        if (customerRepository.existsById(customerId)) {
             customerRepository.deleteById(customerId);
             return true;
         }
@@ -73,18 +84,23 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Optional<CustomerDTO> patchCustomerById(UUID customerId, CustomerDTO customer) {
+        clearCache(customerId);
+
         AtomicReference<Optional<CustomerDTO>> atomicReference = new AtomicReference<>();
 
         customerRepository.findById(customerId).ifPresentOrElse(foundCustomer -> {
-            if (StringUtils.hasText(customer.getName())){
+            if (StringUtils.hasText(customer.getName())) {
                 foundCustomer.setName(customer.getName());
             }
             atomicReference.set(Optional.of(customerMapper
                     .customerToCustomerDto(customerRepository.save(foundCustomer))));
-        }, () -> {
-            atomicReference.set(Optional.empty());
-        });
+        }, () -> atomicReference.set(Optional.empty()));
 
         return atomicReference.get();
+    }
+
+    private void clearCache(UUID beerId) {
+        Optional.ofNullable(cacheManager.getCache(CUSTOMER_CACHE)).ifPresent(cache -> cache.evict(beerId));
+        Optional.ofNullable(cacheManager.getCache(CUSTOMER_LIST_CACHE)).ifPresent(Cache::clear);
     }
 }
