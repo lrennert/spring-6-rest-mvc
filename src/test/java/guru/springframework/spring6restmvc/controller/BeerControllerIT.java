@@ -2,6 +2,7 @@ package guru.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.entities.Beer;
+import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
@@ -18,6 +19,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -41,8 +44,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@RecordApplicationEvents
 @SpringBootTest
 class BeerControllerIT {
+
+    @Autowired
+    ApplicationEvents applicationEvents;
+
     @Autowired
     BeerController beerController;
 
@@ -83,6 +91,8 @@ class BeerControllerIT {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beerDTO)))
                 .andExpect(status().isCreated());
+
+        assertThat(applicationEvents.stream(BeerCreatedEvent.class)).hasSize(1);
     }
 
     @Disabled // just for demo purposes
