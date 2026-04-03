@@ -3,6 +3,7 @@ package guru.springframework.spring6restmvc.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
+import guru.springframework.spring6restmvc.events.BeerUpdatedEvent;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
@@ -249,6 +250,8 @@ class BeerControllerIT {
 
         Beer updatedBeer = beerRepository.findById(beer.getId()).orElseThrow();
         assertThat(updatedBeer.getBeerName()).isEqualTo(beerName);
+
+        assertThat(applicationEvents.stream(BeerUpdatedEvent.class)).hasSize(1);
     }
 
     @Rollback

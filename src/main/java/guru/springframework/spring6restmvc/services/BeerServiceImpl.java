@@ -2,6 +2,7 @@ package guru.springframework.spring6restmvc.services;
 
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
+import guru.springframework.spring6restmvc.events.BeerUpdatedEvent;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
@@ -110,9 +111,7 @@ public class BeerServiceImpl implements BeerService {
 
         val savedBeer = beerRepository.save(beerMapper.beerDtoToBeer(beer));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        applicationEventPublisher.publishEvent(new BeerCreatedEvent(savedBeer, auth));
+        applicationEventPublisher.publishEvent(new BeerCreatedEvent(savedBeer, getAuthentication()));
 
         return beerMapper.beerToBeerDto(savedBeer);
     }
@@ -128,15 +127,24 @@ public class BeerServiceImpl implements BeerService {
 
         AtomicReference<Optional<BeerDTO>> atomicReference = new AtomicReference<>();
 
-        beerRepository.findById(beerId).ifPresentOrElse(foundBeer -> {
-            foundBeer.setBeerName(beer.getBeerName());
-            foundBeer.setBeerStyle(beer.getBeerStyle());
-            foundBeer.setUpc(beer.getUpc());
-            foundBeer.setPrice(beer.getPrice());
-            foundBeer.setQuantityOnHand(beer.getQuantityOnHand());
-            atomicReference.set(Optional.of(beerMapper
-                    .beerToBeerDto(beerRepository.save(foundBeer))));
-        }, () -> atomicReference.set(Optional.empty()));
+        beerRepository.findById(beerId).ifPresentOrElse(
+                foundBeer -> {
+                    foundBeer.setBeerName(beer.getBeerName());
+                    foundBeer.setBeerStyle(beer.getBeerStyle());
+                    foundBeer.setUpc(beer.getUpc());
+                    foundBeer.setPrice(beer.getPrice());
+                    foundBeer.setQuantityOnHand(beer.getQuantityOnHand());
+
+                    val savedBeer = beerRepository.save(foundBeer);
+
+                    applicationEventPublisher.publishEvent(new BeerUpdatedEvent(savedBeer, getAuthentication()));
+
+                    atomicReference.set(Optional.of(beerMapper
+                            .beerToBeerDto(savedBeer)));
+                },
+                () -> atomicReference.set(Optional.empty())
+        );
+
 
         return atomicReference.get();
     }
@@ -186,5 +194,9 @@ public class BeerServiceImpl implements BeerService {
     private void clearCache(UUID beerId) {
         Optional.ofNullable(cacheManager.getCache("beerCache")).ifPresent(beerCache -> beerCache.evict(beerId));
         Optional.ofNullable(cacheManager.getCache("beerListCache")).ifPresent(Cache::clear);
+    }
+
+    private static Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }
