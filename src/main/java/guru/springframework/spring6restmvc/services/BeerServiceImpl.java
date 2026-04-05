@@ -2,6 +2,7 @@ package guru.springframework.spring6restmvc.services;
 
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.events.BeerCreatedEvent;
+import guru.springframework.spring6restmvc.events.BeerPatchedEvent;
 import guru.springframework.spring6restmvc.events.BeerUpdatedEvent;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
@@ -167,26 +168,31 @@ public class BeerServiceImpl implements BeerService {
         AtomicReference<Optional<BeerDTO>> atomicReference = new AtomicReference<>();
 
         beerRepository.findById(beerId).ifPresentOrElse(foundBeer -> {
-            if (StringUtils.hasText(beer.getBeerName())) {
-                foundBeer.setBeerName(beer.getBeerName());
-            }
-            if (beer.getBeerStyle() != null) {
-                foundBeer.setBeerStyle(beer.getBeerStyle());
-            }
-            if (StringUtils.hasText(beer.getUpc())) {
-                foundBeer.setUpc(beer.getUpc());
-            }
-            if (beer.getPrice() != null) {
-                foundBeer.setPrice(beer.getPrice());
-            }
-            if (beer.getQuantityOnHand() != null) {
-                foundBeer.setQuantityOnHand(beer.getQuantityOnHand());
-            }
-            atomicReference.set(Optional.of(beerMapper
-                    .beerToBeerDto(beerRepository.save(foundBeer))));
-        }, () -> {
-            atomicReference.set(Optional.empty());
-        });
+                    if (StringUtils.hasText(beer.getBeerName())) {
+                        foundBeer.setBeerName(beer.getBeerName());
+                    }
+                    if (beer.getBeerStyle() != null) {
+                        foundBeer.setBeerStyle(beer.getBeerStyle());
+                    }
+                    if (StringUtils.hasText(beer.getUpc())) {
+                        foundBeer.setUpc(beer.getUpc());
+                    }
+                    if (beer.getPrice() != null) {
+                        foundBeer.setPrice(beer.getPrice());
+                    }
+                    if (beer.getQuantityOnHand() != null) {
+                        foundBeer.setQuantityOnHand(beer.getQuantityOnHand());
+                    }
+
+                    val  savedBeer = beerRepository.save(foundBeer);
+
+                    applicationEventPublisher.publishEvent(new BeerPatchedEvent(savedBeer, getAuthentication()));
+
+                    atomicReference.set(Optional.of(beerMapper
+                            .beerToBeerDto(savedBeer)));
+                },
+                () -> atomicReference.set(Optional.empty())
+        );
 
         return atomicReference.get();
     }
