@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface BeerMapper {
 
+    @Mapping(target = "lastModifiedDate", ignore = true)
     @Mapping(target = "beerOrderLines", ignore = true)
     @Mapping(target = "categories", ignore = true)
     Beer beerDtoToBeer(BeerDTO dto);
