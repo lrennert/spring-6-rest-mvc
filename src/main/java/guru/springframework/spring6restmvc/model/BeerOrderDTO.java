@@ -14,8 +14,12 @@ public class BeerOrderDTO {
     private Integer version;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
+
     private String customerRef;
+
     private CustomerDTO customer;
+
     private Set<BeerOrderLineDTO> beerOrderLines;
+
     private BeerOrderShipmentDTO beerOrderShipment;
 }

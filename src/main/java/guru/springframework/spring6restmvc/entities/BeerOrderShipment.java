@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Version;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,6 +48,9 @@ public class BeerOrderShipment {
     @OneToOne
     private BeerOrder beerOrder;
 
+    @NotBlank
+    @Size(max = 50)
+    @Column(length = 50)
     private String trackingNumber;
 
     @Override
