@@ -1,13 +1,17 @@
 package guru.springframework.spring6restmvc.bootstrap;
 
 import guru.springframework.spring6restmvc.entities.Beer;
+import guru.springframework.spring6restmvc.entities.BeerOrder;
+import guru.springframework.spring6restmvc.entities.BeerOrderLine;
 import guru.springframework.spring6restmvc.entities.Customer;
 import guru.springframework.spring6restmvc.model.BeerCSVRecord;
 import guru.springframework.spring6restmvc.model.BeerStyle;
+import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import guru.springframework.spring6restmvc.services.BeerCsvService;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -21,11 +25,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class BootstrapData implements CommandLineRunner {
     private final BeerRepository beerRepository;
+    private final BeerOrderRepository beerOrderRepository;
     private final CustomerRepository customerRepository;
     private final BeerCsvService beerCsvService;
 
@@ -35,6 +41,7 @@ public class BootstrapData implements CommandLineRunner {
         loadBeerData();
         loadCsvData();
         loadCustomerData();
+        loadOrderData();
     }
 
     private void loadCsvData() throws IOException {
@@ -132,5 +139,44 @@ public class BootstrapData implements CommandLineRunner {
 
             customerRepository.saveAll(Arrays.asList(customer1, customer2, customer3));
         }
+    }
+
+    private void loadOrderData() {
+        if (beerOrderRepository.count() == 0) {
+            val beers = beerRepository.findAll();
+            val beerIterator = beers.iterator();
+
+            customerRepository.findAll().forEach(customer -> {
+                BeerOrder beerOrder1 = createBeerOrder(customer, 1, List.of(beerIterator.next(), beerIterator.next()));
+                BeerOrder beerOrder2 = createBeerOrder(customer, 2, List.of(beerIterator.next(), beerIterator.next()));
+                beerOrderRepository.saveAll(Arrays.asList(beerOrder1, beerOrder2));
+            });
+
+            // for debugging
+            // val orders = beerOrderRepository.findAll();
+        }
+    }
+
+    private BeerOrder createBeerOrder(Customer customer, int orderNumber, List<Beer> beers) {
+        return BeerOrder.builder()
+                .createdDate(LocalDateTime.now())
+                .lastModifiedDate(LocalDateTime.now())
+                .customerRef("Ref_" + customer.getId() + "_" + orderNumber)
+                .customer(customer)
+                .beerOrderLines(Set.of(
+                        BeerOrderLine.builder()
+                                .createdDate(LocalDateTime.now())
+                                .lastModifiedDate(LocalDateTime.now())
+                                .beer(beers.getFirst())
+                                .orderQuantity(10)
+                                .build(),
+                        BeerOrderLine.builder()
+                                .createdDate(LocalDateTime.now())
+                                .lastModifiedDate(LocalDateTime.now())
+                                .beer(beers.get(1))
+                                .orderQuantity(20)
+                                .build())
+                )
+                .build();
     }
 }

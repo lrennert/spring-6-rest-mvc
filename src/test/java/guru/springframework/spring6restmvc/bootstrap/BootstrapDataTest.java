@@ -1,5 +1,6 @@
 package guru.springframework.spring6restmvc.bootstrap;
 
+import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import guru.springframework.spring6restmvc.services.BeerCsvService;
@@ -20,6 +21,9 @@ class BootstrapDataTest {
     BeerRepository beerRepository;
 
     @Autowired
+    BeerOrderRepository beerOrderRepository;
+
+    @Autowired
     CustomerRepository customerRepository;
 
     @Autowired
@@ -29,7 +33,7 @@ class BootstrapDataTest {
 
     @BeforeEach
     void setUp() {
-        bootstrapData = new BootstrapData(beerRepository, customerRepository, beerCsvService);
+        bootstrapData = new BootstrapData(beerRepository, beerOrderRepository, customerRepository, beerCsvService);
     }
 
     @Test
@@ -38,6 +42,7 @@ class BootstrapDataTest {
 
         assertThat(beerRepository.count()).isEqualTo(2413);
         assertThat(customerRepository.count()).isEqualTo(3);
+        assertThat(beerOrderRepository.count()).isEqualTo(6);
     }
 }
 
