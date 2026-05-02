@@ -1,20 +1,30 @@
 package guru.springframework.spring6restmvc.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.springframework.spring6restmvc.model.BeerOrderCreateDTO;
+import guru.springframework.spring6restmvc.model.BeerOrderLineCreateDTO;
 import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
+import guru.springframework.spring6restmvc.repositories.BeerRepository;
+import guru.springframework.spring6restmvc.repositories.CustomerRepository;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Set;
 
 import static guru.springframework.spring6restmvc.controller.BeerControllerTest.JWT_REQUEST_POST_PROCESSOR;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,6 +36,15 @@ class BeerOrderControllerIT {
 
     @Autowired
     BeerOrderRepository beerOrderRepository;
+
+    @Autowired
+    CustomerRepository customerRepository;
+
+    @Autowired
+    BeerRepository beerRepository;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     MockMvc mockMvc;
 
@@ -52,5 +71,28 @@ class BeerOrderControllerIT {
                         .with(JWT_REQUEST_POST_PROCESSOR))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(beerOrder.getId().toString())));
+    }
+
+    @Test
+    void testCreateBeerOrder() throws Exception {
+        val customerId = customerRepository.findAll().getFirst().getId();
+        val beerId = beerRepository.findAll().getFirst().getId();
+
+        val beerOrderCreateDTO = BeerOrderCreateDTO.builder()
+                .customerRef("123")
+                .customerId(customerId)
+                .beerOrderLines(Set.of(
+                        BeerOrderLineCreateDTO.builder()
+                                .beerId(beerId)
+                                .orderQuantity(7)
+                                .build()))
+                .build();
+
+        mockMvc.perform(post(BeerOrderController.BEER_ORDERS_PATH)
+                        .with(JWT_REQUEST_POST_PROCESSOR)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beerOrderCreateDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
     }
 }
