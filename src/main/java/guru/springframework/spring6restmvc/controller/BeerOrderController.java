@@ -3,6 +3,7 @@ package guru.springframework.spring6restmvc.controller;
 import guru.springframework.spring6restmvc.entities.BeerOrder;
 import guru.springframework.spring6restmvc.model.BeerOrderCreateDTO;
 import guru.springframework.spring6restmvc.model.BeerOrderDTO;
+import guru.springframework.spring6restmvc.model.BeerOrderUpdateDTO;
 import guru.springframework.spring6restmvc.services.BeerOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,5 +48,12 @@ public class BeerOrderController {
         BeerOrder beerOrder = beerOrderService.createBeerOrder(beerOrderCreateDTO);
         URI location = URI.create(BEER_ORDERS_PATH + "/" + beerOrder.getId());
         return ResponseEntity.created(location).build();
+    }
+
+    @PutMapping(value = BEER_ORDERS_PATH_ID)
+    public ResponseEntity<BeerOrderDTO> updateBeerOrder(@PathVariable("beerOrderId") UUID beerOrderId,
+                                                        @Validated @RequestBody BeerOrderUpdateDTO beerOrderUpdateDTO) {
+        BeerOrderDTO beerOrderDTO = beerOrderService.updateBeerOrder(beerOrderId, beerOrderUpdateDTO);
+        return ResponseEntity.ok(beerOrderDTO);
     }
 }
