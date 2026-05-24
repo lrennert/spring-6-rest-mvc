@@ -3,9 +3,12 @@ package guru.springframework.spring6restmvc.services;
 import guru.springframework.spring6restmvc.controller.NotFoundException;
 import guru.springframework.spring6restmvc.entities.BeerOrder;
 import guru.springframework.spring6restmvc.entities.BeerOrderLine;
+import guru.springframework.spring6restmvc.entities.BeerOrderShipment;
 import guru.springframework.spring6restmvc.mappers.BeerOrderMapper;
 import guru.springframework.spring6restmvc.model.BeerOrderCreateDTO;
 import guru.springframework.spring6restmvc.model.BeerOrderDTO;
+import guru.springframework.spring6restmvc.model.BeerOrderShipmentUpdateDTO;
+import guru.springframework.spring6restmvc.model.BeerOrderUpdateDTO;
 import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
@@ -52,13 +55,15 @@ public class BeerOrderServiceImpl implements BeerOrderService {
     public BeerOrder createBeerOrder(BeerOrderCreateDTO beerOrderCreateDTO) {
         val customer = customerRepository
                 .findById(beerOrderCreateDTO.getCustomerId())
-                .orElseThrow(() -> new NotFoundException(String.format("Customer not found with id %s", beerOrderCreateDTO.getCustomerId())));
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Customer not found with id %s", beerOrderCreateDTO.getCustomerId())));
 
         val beerOrderLines = beerOrderCreateDTO.getBeerOrderLines().stream()
                 .map(orderLine -> {
                     val beer = beerRepository
                             .findById(orderLine.getBeerId())
-                            .orElseThrow(() -> new NotFoundException(String.format("Beer not found with id %s", orderLine.getBeerId())));
+                            .orElseThrow(() -> new NotFoundException(
+                                    String.format("Beer not found with id %s", orderLine.getBeerId())));
 
                     return BeerOrderLine.builder()
                             .beer(beer)
@@ -74,6 +79,58 @@ public class BeerOrderServiceImpl implements BeerOrderService {
                 .build();
 
         return beerOrderRepository.save(beerOrder);
+    }
+
+    @Override
+    public BeerOrderDTO updateBeerOrder(UUID beerOrderId, BeerOrderUpdateDTO beerOrderUpdateDTO) {
+        val beerOrder = beerOrderRepository.findById(beerOrderId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Beer order not found with id %s", beerOrderId)));
+
+        beerOrder.setCustomerRef(beerOrderUpdateDTO.getCustomerRef());
+
+        if (beerOrder.getCustomer().getId() != beerOrderUpdateDTO.getCustomerId()) {
+            val customer = customerRepository.findById(beerOrderUpdateDTO.getCustomerId())
+                    .orElseThrow(() -> new NotFoundException("Customer not found with id " + beerOrderUpdateDTO.getCustomerId()));
+            beerOrder.setCustomer(customer);
+        }
+
+        val beerOrderLineUpdateDTOS = beerOrderUpdateDTO.getBeerOrderLines();
+        if (beerOrderLineUpdateDTOS != null) {
+            val beerOrderLines = beerOrderLineUpdateDTOS.stream()
+                    .map(beerOrderLineUpdateDTO -> {
+                        val beerOrderLine = beerOrder.getBeerOrderLines()
+                                .stream()
+                                .filter(foundOrderLine -> foundOrderLine.getId().equals(beerOrderLineUpdateDTO.getId()))
+                                .findAny()
+                                .orElseGet(BeerOrderLine::new);
+
+                        val beer = beerRepository.findById(beerOrderLineUpdateDTO.getBeerId())
+                                .orElseThrow(() -> new NotFoundException(
+                                        String.format("Beer not found with id %s", beerOrderLineUpdateDTO.getBeerId())));
+
+                        beerOrderLine.setBeer(beer);
+                        beerOrderLine.setOrderQuantity(beerOrderLineUpdateDTO.getOrderQuantity());
+                        beerOrderLine.setQuantityAllocated(beerOrderLineUpdateDTO.getQuantityAllocated());
+                        return beerOrderLine;
+                    })
+                    .collect(Collectors.toSet());
+
+            beerOrder.setBeerOrderLines(beerOrderLines);
+        }
+
+        BeerOrderShipmentUpdateDTO shipmentDto = beerOrderUpdateDTO.getBeerOrderShipment();
+        if (shipmentDto != null && shipmentDto.getTrackingNumber() != null) {
+            if (beerOrder.getBeerOrderShipment() == null) {
+                beerOrder.setBeerOrderShipment(BeerOrderShipment.builder()
+                        .trackingNumber(shipmentDto.getTrackingNumber())
+                        .build());
+            } else {
+                beerOrder.getBeerOrderShipment().setTrackingNumber(shipmentDto.getTrackingNumber());
+            }
+        }
+
+        return beerOrderMapper.beerOrderToBeerOrderDto(beerOrderRepository.save(beerOrder));
     }
 
     private PageRequest buildPageRequest(Integer pageNumber, Integer pageSize) {
