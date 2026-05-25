@@ -133,6 +133,15 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         return beerOrderMapper.beerOrderToBeerOrderDto(beerOrderRepository.save(beerOrder));
     }
 
+    @Override
+    public void deleteBeerOrder(UUID beerOrderId) {
+        if (beerOrderRepository.existsById(beerOrderId)) {
+            beerOrderRepository.deleteById(beerOrderId);
+        } else {
+            throw new NotFoundException(String.format("Beer order not found with id %s", beerOrderId));
+        }
+    }
+
     private PageRequest buildPageRequest(Integer pageNumber, Integer pageSize) {
         int queryPageNumber;
         int queryPageSize;

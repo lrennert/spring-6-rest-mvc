@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,5 +56,11 @@ public class BeerOrderController {
                                                         @Validated @RequestBody BeerOrderUpdateDTO beerOrderUpdateDTO) {
         BeerOrderDTO beerOrderDTO = beerOrderService.updateBeerOrder(beerOrderId, beerOrderUpdateDTO);
         return ResponseEntity.ok(beerOrderDTO);
+    }
+
+    @DeleteMapping(value = BEER_ORDERS_PATH_ID)
+    public ResponseEntity<Void> deleteBeerOrder(@PathVariable("beerOrderId") UUID beerOrderId) {
+        beerOrderService.deleteBeerOrder(beerOrderId);
+        return ResponseEntity.noContent().build();
     }
 }
