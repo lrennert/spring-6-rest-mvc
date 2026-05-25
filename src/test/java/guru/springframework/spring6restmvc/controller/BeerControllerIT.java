@@ -9,6 +9,7 @@ import guru.springframework.spring6restmvc.events.BeerUpdatedEvent;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
+import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import lombok.val;
 import org.hamcrest.core.IsNull;
@@ -59,6 +60,9 @@ class BeerControllerIT {
 
     @Autowired
     BeerRepository beerRepository;
+
+    @Autowired
+    BeerOrderRepository beerOrderRepository;
 
     @Autowired
     BeerMapper beerMapper;
@@ -241,7 +245,12 @@ class BeerControllerIT {
     @Transactional
     @Test
     void deleteByIdFound() {
-        Beer beer = beerRepository.findAll().getFirst();
+        Beer beer = beerRepository.save(Beer.builder()
+                        .beerName("New Beer")
+                        .beerStyle(BeerStyle.IPA)
+                        .upc("123123")
+                        .price(BigDecimal.TEN)
+                .build());
 
         ResponseEntity<?> responseEntity = beerController.deleteById(beer.getId());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
@@ -321,6 +330,7 @@ class BeerControllerIT {
     @Transactional
     @Test
     void testEmptyList() {
+        beerOrderRepository.deleteAll();
         beerRepository.deleteAll();
         Page<BeerDTO> dtos = beerController.listBeers(null, null, false, 1, 25);
 
