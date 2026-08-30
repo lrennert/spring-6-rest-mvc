@@ -3,6 +3,7 @@ package guru.springframework.spring6restmvc.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -16,6 +17,8 @@ public class BeerOrderDTO {
     private LocalDateTime lastModifiedDate;
 
     private String customerRef;
+
+    private BigInteger paymentAmount;
 
     private CustomerDTO customer;
 

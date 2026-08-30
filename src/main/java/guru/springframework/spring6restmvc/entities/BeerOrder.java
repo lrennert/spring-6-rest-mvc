@@ -20,6 +20,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -31,13 +32,14 @@ import java.util.UUID;
 @Builder
 public class BeerOrder {
 
-    public BeerOrder(UUID id, Long version, LocalDateTime createdDate, LocalDateTime lastModifiedDate, String customerRef, Customer customer,
-                     Set<BeerOrderLine> beerOrderLines, BeerOrderShipment beerOrderShipment) {
+    public BeerOrder(UUID id, Long version, LocalDateTime createdDate, LocalDateTime lastModifiedDate, String customerRef, BigDecimal paymentAmount,
+                     Customer customer, Set<BeerOrderLine> beerOrderLines, BeerOrderShipment beerOrderShipment) {
         this.id = id;
         this.version = version;
         this.createdDate = createdDate;
         this.lastModifiedDate = lastModifiedDate;
         this.customerRef = customerRef;
+        this.paymentAmount = paymentAmount;
         setCustomer(customer);
         setBeerOrderLines(beerOrderLines);
         setBeerOrderShipment(beerOrderShipment);
@@ -66,6 +68,8 @@ public class BeerOrder {
 
     @Size(max = 255)
     private String customerRef;
+
+    private BigDecimal paymentAmount;
 
     @ManyToOne
     private Customer customer;
