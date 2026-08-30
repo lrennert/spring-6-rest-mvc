@@ -1,7 +1,10 @@
 package guru.springframework.spring6restmvc.entities;
 
+import guru.springframework.spring6restmvc.model.BeerOrderLineStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -62,4 +65,8 @@ public class BeerOrderLine {
 
     @Builder.Default
     private Integer quantityAllocated = 0;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private BeerOrderLineStatus orderLineStatus = BeerOrderLineStatus.NEW;
 }
