@@ -1,14 +1,14 @@
 package guru.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.spring6restmvc.model.BeerOrderCreateDTO;
-import guru.springframework.spring6restmvc.model.BeerOrderLineCreateDTO;
-import guru.springframework.spring6restmvc.model.BeerOrderLineUpdateDTO;
-import guru.springframework.spring6restmvc.model.BeerOrderShipmentUpdateDTO;
-import guru.springframework.spring6restmvc.model.BeerOrderUpdateDTO;
 import guru.springframework.spring6restmvc.repositories.BeerOrderRepository;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import guru.springframework.spring6restmvc.repositories.CustomerRepository;
+import guru.springframework.spring6restmvcapi.model.BeerOrderCreateDTO;
+import guru.springframework.spring6restmvcapi.model.BeerOrderLineCreateDTO;
+import guru.springframework.spring6restmvcapi.model.BeerOrderLineUpdateDTO;
+import guru.springframework.spring6restmvcapi.model.BeerOrderShipmentUpdateDTO;
+import guru.springframework.spring6restmvcapi.model.BeerOrderUpdateDTO;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
