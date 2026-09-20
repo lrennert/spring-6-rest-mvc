@@ -178,6 +178,10 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <jvmArguments>-Dspring.application.admin.enabled=true</jvmArguments>
+                    <!-- Pin older AMD64 builder because the current builder fails during image inspection -->
+                    <image>
+                        <builder>paketobuildpacks/builder-noble-java-tiny@sha256:cb1181a96b114a1437906e1461510c7c49fd2d36c17e76ecab7d4146e4380b05</builder>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
