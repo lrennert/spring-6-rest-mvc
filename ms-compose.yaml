@@ -1,0 +1,89 @@
+name: spring-6-microservices
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: restadmin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: restdb
+    expose:
+      - "5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "restadmin", "-d", "restdb" ]
+      timeout: 20s
+      retries: 10
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  auth-server:
+    container_name: auth-server
+    image: spring-6-auth-server:0.0.1-SNAPSHOT
+    expose:
+      - "9000"
+  rest-mvc:
+    container_name: rest-mvc
+    image: spring-6-rest-mvc:0.0.1-SNAPSHOT
+    environment:
+      - SPRING_PROFILES_ACTIVE=postgres
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI=http://auth-server:9000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/restdb
+      - SERVER_PORT=8080
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    expose:
+      - "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  gateway:
+    container_name: gateway
+    image: spring-6-gateway:0.0.1-SNAPSHOT
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-server
+      - rest-mvc
+  cool-service:
+    container_name: cool-service
+    image: spring-6-cool-service:0.0.1-SNAPSHOT
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    expose:
+      - "8080"
+    depends_on:
+      - kafka
+  cold-service:
+    container_name: cold-service
+    image: spring-6-cold-service:0.0.1-SNAPSHOT
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    expose:
+      - "8080"
+    depends_on:
+      - kafka
+  icecold-service:
+    container_name: icecold-service
+    image: spring-6-icecold-service:0.0.1-SNAPSHOT
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    expose:
+      - "8080"
+    depends_on:
+      - kafka
