@@ -14,6 +14,7 @@ import guru.springframework.spring6restmvcapi.model.BeerOrderDTO;
 import guru.springframework.spring6restmvcapi.model.BeerOrderShipmentUpdateDTO;
 import guru.springframework.spring6restmvcapi.model.BeerOrderUpdateDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class BeerOrderServiceImpl implements BeerOrderService {
@@ -56,21 +58,24 @@ public class BeerOrderServiceImpl implements BeerOrderService {
 
     @Override
     public BeerOrder createBeerOrder(BeerOrderCreateDTO beerOrderCreateDTO) {
+        log.debug("Creating order for customer id: " + beerOrderCreateDTO.getCustomerId());
         val customer = customerRepository
                 .findById(beerOrderCreateDTO.getCustomerId())
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Customer not found with id %s", beerOrderCreateDTO.getCustomerId())));
 
         val beerOrderLines = beerOrderCreateDTO.getBeerOrderLines().stream()
-                .map(orderLine -> {
+                .map(beerOrderLineCreateDTO -> {
+                    log.debug("Adding beer order line for beer with id: " + beerOrderLineCreateDTO.getBeerId());
+
                     val beer = beerRepository
-                            .findById(orderLine.getBeerId())
+                            .findById(beerOrderLineCreateDTO.getBeerId())
                             .orElseThrow(() -> new NotFoundException(
-                                    String.format("Beer not found with id %s", orderLine.getBeerId())));
+                                    String.format("Beer not found with id %s", beerOrderLineCreateDTO.getBeerId())));
 
                     return BeerOrderLine.builder()
                             .beer(beer)
-                            .orderQuantity(orderLine.getOrderQuantity())
+                            .orderQuantity(beerOrderLineCreateDTO.getOrderQuantity())
                             .build();
                 })
                 .collect(Collectors.toSet());
@@ -136,8 +141,10 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         beerOrder.setPaymentAmount(beerOrderUpdateDTO.getPaymentAmount());
 
         BeerOrderDTO dto = beerOrderMapper.beerOrderToBeerOrderDto(beerOrderRepository.save(beerOrder));
+        log.debug("Payment amount: " + dto.getPaymentAmount());
 
         if (beerOrderUpdateDTO.getPaymentAmount() != null) {
+            log.debug("Sending order update event for order id: " + beerOrderId);
             applicationEventPublisher.publishEvent(OrderPlacedEvent.builder()
                     .beerOrderDTO(dto)
                     .build());
