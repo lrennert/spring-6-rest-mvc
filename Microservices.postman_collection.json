@@ -1,0 +1,340 @@
+{
+  "info": {
+    "_postman_id": "e7b4f358-71e0-40a6-ac7b-7579ca9d5dc0",
+    "name": "Microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "31533525"
+  },
+  "item": [
+    {
+      "name": "beer",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/beer?pageNumber=1&pageSize=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "beer"
+          ],
+          "query": [
+            {
+              "key": "pageNumber",
+              "value": "1"
+            },
+            {
+              "key": "pageSize",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "beer/id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/beer/:beerId",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "beer",
+            ":beerId"
+          ],
+          "variable": [
+            {
+              "key": "beerId",
+              "value": "{{beerId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "customer",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customer",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customer"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "customer/id",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customer/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customer",
+            "{{customerId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "beer-orders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/beer-orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "beer-orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "beer-orders/id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/beer-orders/:beerOrderId",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "beer-orders",
+            ":beerOrderId"
+          ],
+          "variable": [
+            {
+              "key": "beerOrderId",
+              "value": "{{beerOrderId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "beer-orders",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customerRef\": \"Created in postman\",\n    \"customerId\": \"{{customerId}}\",\n    \"beerOrderLines\": [\n        {\n            \"beerId\": \"{{beerId}}\",\n            \"orderQuantity\": 2\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/beer-orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "beer-orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "beer-orders",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customerRef\": \"Created in postman\",\n    \"customerId\": \"{{customerId}}\",\n    \"beerOrderLines\": [\n        {\n            \"id\": \"{{beerOrderLineId}}\",\n            \"beerId\": \"{{beerId}}\",\n            \"orderQuantity\": 2,\n            \"quantityAllocated\": 1\n        }\n    ],\n    \"paymentAmount\": 12.25\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/beer-orders/:beerOrderId",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "beer-orders",
+            ":beerOrderId"
+          ],
+          "variable": [
+            {
+              "key": "beerOrderId",
+              "value": "{{beerOrderId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "accessTokenUrl",
+        "value": "http://localhost:8080/oauth2/token",
+        "type": "string"
+      },
+      {
+        "key": "clientSecret",
+        "value": "{{clientSecret}}",
+        "type": "string"
+      },
+      {
+        "key": "clientId",
+        "value": "{{clientId}}",
+        "type": "string"
+      },
+      {
+        "key": "tokenName",
+        "value": "token1",
+        "type": "string"
+      },
+      {
+        "key": "refreshRequestParams",
+        "value": [],
+        "type": "any"
+      },
+      {
+        "key": "tokenRequestParams",
+        "value": [],
+        "type": "any"
+      },
+      {
+        "key": "authRequestParams",
+        "value": [],
+        "type": "any"
+      },
+      {
+        "key": "challengeAlgorithm",
+        "value": "S256",
+        "type": "string"
+      },
+      {
+        "key": "scope",
+        "value": "message.read message.write",
+        "type": "string"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      },
+      {
+        "key": "client_authentication",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "clientId",
+      "value": ""
+    },
+    {
+      "key": "clientSecret",
+      "value": ""
+    },
+    {
+      "key": "beerId",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "beerOrderId",
+      "value": ""
+    },
+    {
+      "key": "beerOrderLineId",
+      "value": ""
+    }
+  ]
+}
